@@ -77,6 +77,7 @@ import valificationtool.model.ProgramChart;
 import valificationtool.model.UseProgramChart;
 import valificationtool.model.VariableInfo;
 import valificationtool.util.Console;
+import valificationtool.util.FileOpen;
 
 
 public class SampleView extends ViewPart {
@@ -185,18 +186,18 @@ public class SampleView extends ViewPart {
         	public void doubleClick(DoubleClickEvent event) {
 
         		IStructuredSelection sel = (IStructuredSelection)event.getSelection();
-        		ProgramChart p = (ProgramChart)sel.getFirstElement();
-        		if(p.getFile() != null && p.getProject_name() != null){
+        		ProgramChart target_program = (ProgramChart)sel.getFirstElement();
+        		if(target_program.getFile() != null && target_program.getProject_name() != null){
 	        		TableItem item;
 	        		variable_viewer.getTable().removeAll();
-	        		for(int i = 0; i < p.before_variable_info.size(); i++){
-	        			VariableInfo temp = p.before_variable_info.get(i);
-	        			int a_idx = p.after_variable_info.indexOf(temp);
+	        		for(int i = 0; i < target_program.before_variable_info.size(); i++){
+	        			VariableInfo temp = target_program.before_variable_info.get(i);
+	        			int a_idx = target_program.after_variable_info.indexOf(temp);
 	        			String variable = temp.getName();
 	        			String type = temp.getType();
 	        			String value = temp.getValue();
 	        			if(a_idx != -1 && !value.equals("")){
-	        				VariableInfo a_temp = p.after_variable_info.get(a_idx);
+	        				VariableInfo a_temp = target_program.after_variable_info.get(a_idx);
 	        				value = value + " -> " + a_temp.getValue();
 	        			}
 	        			VariableInfo t = new VariableInfo(type, variable, value);
@@ -207,29 +208,8 @@ public class SampleView extends ViewPart {
 	        		}
         		}
         		try {
-            		//TODO;ファイルを開ける
-            		IWorkbench workbench = PlatformUI.getWorkbench();
-            		IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-            		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-            		IWorkspaceRoot root = workspace.getRoot();
-            		IContainer container = root.getProject(UseProgramChart.getProject_name());
-            		IFile file = container.getFile(new Path(p.getFile().replaceAll(UseProgramChart.getProject_path(),"")));
-        		    IWorkbenchPage page=  window.getActivePage();
-        		    IEditorPart editorPart = IDE.openEditor(page, file);
-
-    		    	//TODO:指定行ジャンプを行う
-					IEditorInput editorInput = editorPart.getEditorInput();
-					IResource resource = (IResource)editorInput.getAdapter(IResource.class);
-
-					Map attributes = new HashMap();
-					attributes.put(IMarker.LINE_NUMBER, new Integer(p.getLine()));
-					IMarker marker = resource.createMarker(IMarker.TEXT);
-					marker.setAttributes(attributes);
-
-					IDE.gotoMarker(editorPart, marker);
-
-					marker.delete();
-
+            		//ファイルを開け、指定行にジャンプする
+        		    FileOpen.jumpLineOnFile(target_program.getFile(), UseProgramChart.getProject_path(),new Integer(target_program.getLine()));
 				}catch (Exception e) {
 					// TODO 自動生成された catch ブロック
 					e.printStackTrace();

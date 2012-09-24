@@ -29,6 +29,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import valificationtool.model.FixProgram;
 import valificationtool.model.UseProgramChart;
+import valificationtool.util.FileOpen;
 import valificationtool.util.string.FindStringInformation;
 import valificationtool.util.string.StringExtend;
 
@@ -73,22 +74,9 @@ public class BugMarkerResolutionGenerator implements IMarkerResolutionGenerator 
 			}
 			public void fixUpperUnboundError(FixProgram f){
 				//リソースからファイルを開ける
-        		IWorkbench workbench = PlatformUI.getWorkbench();
-        		IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-        		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-        		IWorkspaceRoot root = workspace.getRoot();
-        		IContainer container = root.getProject(UseProgramChart.getProject_name());
-        		IFile file = container.getFile(new Path(f.getProgramPath().replaceAll(f.getProjectName(),"")));
-    		    IWorkbenchPage page=  window.getActivePage();
-    		    IEditorPart editorPart = null;
-    		    try {
-					editorPart = IDE.openEditor(page, file);
-				} catch (PartInitException e) {
-					e.printStackTrace();
-					return;
-				}
+    		    IEditorPart editorPart =  FileOpen.getIEditorPart(f.getProgramPath(), f.getProjectName());
+				IEditorInput editorInput = editorPart.getEditorInput();
 
-    		    IEditorInput editorInput = editorPart.getEditorInput();
     		    AbstractTextEditor aEditor = (AbstractTextEditor) editorPart;
     		    IDocument document =
     		    		  aEditor.getDocumentProvider().getDocument(editorInput);
