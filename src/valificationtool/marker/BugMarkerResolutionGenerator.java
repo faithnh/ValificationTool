@@ -96,9 +96,14 @@ public class BugMarkerResolutionGenerator implements IMarkerResolutionGenerator 
     		    try {
     				//開いたファイルから修正対象の文字列を探索する
 					String tmp = document.get(document.getLineOffset(f.getLine()-1),document.getLineLength(f.getLine()-1));
-					tmp = StringExtend.replaceFuzzy(tmp, f.getFixBefore(), f.getFixAfter());
+					String tabs = "";
+					//追加するタブを求める
+					for(int i = 0; i < tmp.length() && tmp.charAt(i) == '\t'; i++){
+						tabs = tabs + "\t";
+					}
 
 					//見つけた文字列を修正後の文字列に置き換える
+					tmp = StringExtend.replaceFuzzy(tmp, f.getFixBefore(), f.getFixAfter().replaceAll("\n", "\n" + tabs));
 					document.replace(document.getLineOffset(f.getLine()-1),document.getLineLength(f.getLine()-1), tmp);
     		    } catch (BadLocationException e) {
 					e.printStackTrace();

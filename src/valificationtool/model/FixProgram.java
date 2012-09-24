@@ -108,7 +108,8 @@ public class FixProgram {
 		String error_expression;
 		/*実行経路からbranchを探す*/
 		for(int i = p.size() - 1; i > 0; i-- ){
-			if(p.get(i).getType().equals("branch")){
+			if(p.get(i).getType().equals("branch")
+					|| p.get(i).getType().equals("repeat_branch")){
 				branch_p = p.get(i);
 				break;
 			}
@@ -150,19 +151,21 @@ public class FixProgram {
 		/*エラーの発生箇所がブランチでなければ、該当コードに条件分岐を追加する*/
 		ProgramChart error_program_chart = p.get(p.size() - 1);
 		if(!error_program_chart.getType().equals("branch")){
-
-			for(int i = 0; i < macro_info.size(); i++){
-				FixProgram f = new FixProgram(error_program_chart.getLine(), error_program_chart.getLine(), UPPER_UNBOUND_ERROR, branch_p.getFile(),
-						branch_p.getProject_name(), error_program_chart.getProgram(),
-						"if(" + error_expression + " < " + macro_info.get(i).getName() + " ){\n" + error_program_chart.getProgram() + "\n}\n");
-				result.add(f);
-			}
-		}else if(!error_program_chart.getType().equals("repeat_branch")){
-			for(int i = 0; i < macro_info.size(); i++){
-				FixProgram f = new FixProgram(error_program_chart.getLine(), error_program_chart.getLine(), UPPER_UNBOUND_ERROR, branch_p.getFile(),
-						branch_p.getProject_name(), error_program_chart.getProgram(),
-						"if(" + error_expression + " < " + macro_info.get(i).getName() + " ){\n" + error_program_chart.getProgram() + "\n}\nelse{\nbreak;\n}\n");
-				result.add(f);
+			/*直後の条件分岐が存在し、なおかつ継続系の分岐の場合、break命令も追加する*/
+			if(branch_p != null && branch_p.getType().equals("repeat_branch")){
+				for(int i = 0; i < macro_info.size(); i++){
+					FixProgram f = new FixProgram(error_program_chart.getLine(), error_program_chart.getLine(), UPPER_UNBOUND_ERROR, branch_p.getFile(),
+							branch_p.getProject_name(), error_program_chart.getProgram(),
+							"if(" + error_expression + " < " + macro_info.get(i).getName() + " ){\n\t" + error_program_chart.getProgram() + "\n}\nelse{\n\tbreak;\n}");
+					result.add(f);
+				}
+			}else{
+				for(int i = 0; i < macro_info.size(); i++){
+					FixProgram f = new FixProgram(error_program_chart.getLine(), error_program_chart.getLine(), UPPER_UNBOUND_ERROR, branch_p.getFile(),
+							branch_p.getProject_name(), error_program_chart.getProgram(),
+							"if(" + error_expression + " < " + macro_info.get(i).getName() + " ){\n\t" + error_program_chart.getProgram() + "\n}");
+					result.add(f);
+				}
 			}
 		}
 		return result;
