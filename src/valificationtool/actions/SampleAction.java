@@ -39,33 +39,8 @@ public class SampleAction implements IWorkbenchWindowActionDelegate {
 	 * @see IWorkbenchWindowActionDelegate#run
 	 */
 	public void run(IAction action){
-		Shell parent = Display.getCurrent().getActiveShell();
-		ProgressMonitorDialog dialog = new ProgressMonitorDialog(parent);
-		try {
-			dialog.run(true, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor)
-				throws InvocationTargetException, InterruptedException{
-					String[] cmd = {"java", "-version"};
-					// 進捗を監視する処理
-					monitor.beginTask("1秒寝る処理を10回繰り返します。", 1);
 
-					OriginalRuntime or = new OriginalRuntime();
-					try {
-						or.execCmd(cmd);
-					} catch (IOException e) {
-						// TODO 自動生成された catch ブロック
-						e.printStackTrace();
-					}
 
-					monitor.worked(1);
-					monitor.done();
-				}
-			} );
-		} catch(InvocationTargetException e) {
-			// 処理中に何らかの例外が発生したときの処理
-		} catch(InterruptedException e) {
-			// キャンセルされたときの処理
-		}
 	}
 
 	/**

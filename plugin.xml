@@ -2,52 +2,78 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+   <!--モデル検証のメニューコマンド-->
    <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            label="サンプルのアクション・セット"
-            visible="true"
-            id="ValificationTool.actionSet">
+         point="org.eclipse.ui.commands">
+      <category
+            name="ツール"
+            id="valificationtool.commands.category">
+      </category>
+      <command
+            name="不具合の検証"
+            categoryId="valificationtool.commands.category"
+            id="valificationtool.commands.model_valification">
+      </command>
+   </extension>
+   <!--モデル検証のハンドラ設定-->
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            commandId="valificationtool.commands.model_valification"
+            class="valificationtool.handlers.SampleHandler">
+            <!--IProject（プロジェクトのリソース）をアクティブにしている限り有効-->
+            <activeWhen>
+		      <with
+		            variable="selection">
+		         <iterate
+		               operator="or">
+		            <instanceof
+		                  value="org.eclipse.core.resources.IProject">
+		            </instanceof>
+		         </iterate>
+		      </with>
+		   </activeWhen>
+      </handler>
+   </extension>
+   <!--モデル検証のメニュー名-->
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               label="サンプル・メニュー(&amp;M)"
-               id="sampleMenu">
-            <separator
-                  name="sampleGroup">
-            </separator>
+               label="モデル検証"
+               mnemonic="M"
+               id="valification.menus.sampleMenu">
+            <command
+                  commandId="valificationtool.commands.model_valification"
+                  mnemonic="S"
+                  id="valification.menus.sampleCommand">
+            </command>
          </menu>
-         <action
-               label="サンプル・アクション(&amp;S)"
-               icon="icons/sample.gif"
-               class="valificationtool.actions.SampleAction"
-               tooltip="Hello, Eclipse world"
-               menubarPath="sampleMenu/sampleGroup"
-               toolbarPath="sampleGroup"
-               id="valificationtool.actions.SampleAction">
-         </action>
-      </actionSet>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="sample2.toolbars.sampleToolbar">
+            <command
+                  commandId="valificationtool.commands.model_valification"
+                  icon="icons/sample.gif"
+                  tooltip="Say hello world"
+                  id="sample2.toolbars.sampleCommand">
+            </command>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
-         point="org.eclipse.ui.editors.templates">
-      <template
-            autoinsert="true"
-            contextTypeId="javadocValificationTool.template1"
-            description="@memoタグを追加します"
-            id="jp.nagoya.city.nmri.template.memo"
-            name="memo">
-         <pattern>
-            pattern body text
-         </pattern>
-      </template>
-   </extension>
-<extension
          point="org.eclipse.ui.views">
       <category
-            name="サンプル・カテゴリー"
+            name="モデル検査"
             id="ViewSample">
       </category>
       <view
-            name="サンプル・ビュー"
+            name="検証結果"
             icon="icons/sample.gif"
+            allowMultiple="true"
             category="ViewSample"
             class="valificationtool.views.SampleView"
             id="valificationtool.views.SampleView">
@@ -71,5 +97,21 @@
             file="contexts.xml">
       </contexts>
    </extension>
-
+	<extension
+	      id="BugMarker"
+	      point="org.eclipse.core.resources.markers">
+	   <super
+	         type="org.eclipse.core.resources.problemmarker">
+	   </super>
+	   <persistent
+	         value="true">
+	   </persistent>
+	</extension>
+	<extension point="org.eclipse.ui.ide.markerResolution">
+		<markerResolutionGenerator
+			markerType="ValificationTool.BugMarker"
+				class="valificationtool.marker.BugMarkerResolutionGenerator">
+			<attribute name="varification_error_code" value="Upper"/>
+		</markerResolutionGenerator>
+	</extension>
 </plugin>

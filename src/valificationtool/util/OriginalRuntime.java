@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
+import valificationtool.model.UseProgramChart;
+
 public class OriginalRuntime {
 
   	private InputStream in = null;
@@ -57,6 +59,9 @@ public class OriginalRuntime {
 
 				  	while ((line = br.readLine()) != null) {
 				  		System.out.println(line);
+						if(line.matches("(<[^>]+>)|(<[^>]+>[^<]*</[^>]+>)")){
+							UseProgramChart.addString(line);
+						}
 				  		console.out(line);
 				  	}
 				  		System.out.println("Thread stdRun end");
@@ -75,6 +80,9 @@ public class OriginalRuntime {
 					  new BufferedReader(new InputStreamReader(ein));
 					while ((errLine = ebr.readLine()) != null) {
 						System.err.println(errLine);
+						if(errLine.matches("(<[^>]+>)|(<[^>]+>[^<]*</[^>]+>)")){
+							UseProgramChart.addString(errLine);
+						}
 						console.out(errLine);
 					}
 					System.out.println("Thread errRun end");
